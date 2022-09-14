@@ -79,15 +79,46 @@ if (${FMI_VERSION} LESS 3)
 ")
 endif ()
 
-set (MODEL_NAMES BouncingBall Dahlquist Stair Feedthrough VanDerPol)
+# collect model names
+function (collect_model_names RESULT CUR_DIR)
+  set (MODEL_NAMES_ "")
 
-if (${FMI_VERSION} GREATER 1 OR "${FMI_TYPE}" STREQUAL "CS")
-  set (MODEL_NAMES ${MODEL_NAMES} Resource)
-endif ()
+  set (VERSION_STR_ "${FMI_VERSION}")
+  if (${FMI_VERSION} EQUAL 1)
+    set (VERSION_STR_ "${VERSION_STR_}${FMI_TYPE}")
+  endif ()
 
-if (${FMI_VERSION} GREATER 2)
-  set (MODEL_NAMES ${MODEL_NAMES} LinearTransform Clocks)
-endif ()
+  file (GLOB CHILDREN_ RELATIVE "${CUR_DIR}" "${CUR_DIR}/*")
+  foreach (CHILD_ ${CHILDREN_})
+    if (NOT IS_DIRECTORY "${CUR_DIR}/${CHILD_}")
+      continue()
+    endif ()
+
+    set (MODEL_DIR_ "${CUR_DIR}/${CHILD_}")
+    file (GLOB MODEL_FILES_ RELATIVE "${MODEL_DIR_}" "${MODEL_DIR_}/*")
+
+    set (VERSIONS_ "")
+    foreach (FILE_NAME_ ${MODEL_FILES_})
+      if (FILE_NAME_ STREQUAL "FMI3.xml")
+        list (APPEND VERSIONS_ "3")
+      elseif (FILE_NAME_ STREQUAL "FMI2.xml")
+        list (APPEND VERSIONS_ "2")
+      elseif (FILE_NAME_ STREQUAL "FMI1CS.xml")
+        list (APPEND VERSIONS_ "1CS")
+      elseif (FILE_NAME_ STREQUAL "FMI1ME.xml")
+        list (APPEND VERSIONS_ "1ME")
+      endif ()
+    endforeach ()
+
+    if (${VERSION_STR_} IN_LIST VERSIONS_)
+      list (APPEND MODEL_NAMES_ ${CHILD_})
+    endif ()
+  endforeach ()
+
+  set(${RESULT} ${MODEL_NAMES_} PARENT_SCOPE)
+endfunction ()
+
+collect_model_names(MODEL_NAMES "${CMAKE_CURRENT_LIST_DIR}")
 
 foreach (MODEL_NAME ${MODEL_NAMES})
 
