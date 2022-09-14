@@ -43,7 +43,7 @@ do { \
     size_t index = 0; \
     Status status = OK; \
     if (nValueReferences == 0) return (fmi3Status)status; \
-    if (S->isDirtyValues) { \
+    if (S->isDirtyValues && S->state != StepMode) { \
         Status s = calculateValues(S); \
         status = max(status, s); \
         if (status > Warning) return (fmi3Status)status; \
@@ -1235,6 +1235,7 @@ fmi3Status fmi3SetTime(fmi3Instance instance, fmi3Float64 time) {
     ASSERT_STATE(SetTime);
 
     S->time = time;
+    S->isDirtyValues = true;
 
     return fmi3OK;
 }
@@ -1433,7 +1434,6 @@ fmi3Status fmi3DoStep(fmi3Instance instance,
     *eventHandlingNeeded = fmi3False;
 
     while (true) {
-
         nextCommunicationPointReached = S->time + FIXED_SOLVER_STEP > nextCommunicationPoint;
 
         if (nextCommunicationPointReached) {
@@ -1461,6 +1461,7 @@ fmi3Status fmi3DoStep(fmi3Instance instance,
         }
 #endif
     }
+    calculateValues(S);
 
     *earlyReturn = !nextCommunicationPointReached;
 

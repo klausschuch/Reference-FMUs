@@ -523,6 +523,7 @@ void doFixedStep(ModelInstance *comp, bool* stateEvent, bool* timeEvent) {
     double  x[NX] = { 0 };
     double dx[NX] = { 0 };
 
+    calculateValues(comp);
     getContinuousStates(comp, x, NX);
     getDerivatives(comp, dx, NX);
 
@@ -537,6 +538,8 @@ void doFixedStep(ModelInstance *comp, bool* stateEvent, bool* timeEvent) {
     comp->nSteps++;
 
     comp->time = comp->nSteps * FIXED_SOLVER_STEP;
+
+    calculateValues(comp);
 
     // state event
     *stateEvent = false;
