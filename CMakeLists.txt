@@ -196,29 +196,35 @@ foreach (SOURCE_FILE config.h model.c)
 endforeach(SOURCE_FILE)
 
 # documentation
-if (${FMI_VERSION} EQUAL 1)
-  add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
-    "${CMAKE_CURRENT_SOURCE_DIR}/${MODEL_NAME}/readme.html"
-    "${FMU_BUILD_DIR}/documentation/_main.html"
-  )
-else()
-  add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
-    "${CMAKE_CURRENT_SOURCE_DIR}/${MODEL_NAME}/readme.html"
-    "${FMU_BUILD_DIR}/documentation/index.html"
-  )
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${MODEL_NAME}/readme.html")
+  if (${FMI_VERSION} EQUAL 1)
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
+      "${CMAKE_CURRENT_SOURCE_DIR}/${MODEL_NAME}/readme.html"
+      "${FMU_BUILD_DIR}/documentation/_main.html"
+    )
+  else()
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
+      "${CMAKE_CURRENT_SOURCE_DIR}/${MODEL_NAME}/readme.html"
+      "${FMU_BUILD_DIR}/documentation/index.html"
+    )
+  endif()
 endif()
 
 # plot
-add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
-  "${CMAKE_CURRENT_SOURCE_DIR}/${MODEL_NAME}/${MODEL_NAME}_ref.svg"
-  "${FMU_BUILD_DIR}/documentation/${MODEL_NAME}_ref.svg"
-)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${MODEL_NAME}/${MODEL_NAME}_ref.svg")
+  add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
+    "${CMAKE_CURRENT_SOURCE_DIR}/${MODEL_NAME}/${MODEL_NAME}_ref.svg"
+    "${FMU_BUILD_DIR}/documentation/${MODEL_NAME}_ref.svg"
+  )
+endif()
 
 # reference csv
-add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
-  "${CMAKE_CURRENT_SOURCE_DIR}/${MODEL_NAME}/${MODEL_NAME}_ref.csv"
-  "${FMU_BUILD_DIR}/documentation/${MODEL_NAME}_ref.csv"
-)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${MODEL_NAME}/${MODEL_NAME}_ref.csv")
+  add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
+    "${CMAKE_CURRENT_SOURCE_DIR}/${MODEL_NAME}/${MODEL_NAME}_ref.csv"
+    "${FMU_BUILD_DIR}/documentation/${MODEL_NAME}_ref.csv"
+  )
+endif()
 
 # license
 add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
