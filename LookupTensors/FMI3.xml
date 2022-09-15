@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fmiModelDescription fmiVersion="3.0" modelName="LookupTensors" generationTool="Reference FMUs (development build)" instantiationToken="{8c4e810f-3df3-4a02-8276-176fa3c9f008}">
+  <CoSimulation
+    modelIdentifier="LookupTensors"
+    canHandleVariableCommunicationStepSize="true"
+    fixedInternalStepSize="0.001"/>
+
+  <DefaultExperiment startTime="0" stopTime="10" stepSize="0.01"/>
+
+  <ModelVariables>
+    <Float64 name="static_vector" valueReference="0" causality="parameter" variability="tunable" description="Static vector" start="1.0 2.0 3.0">
+      <Dimension start="3"/>
+    </Float64>
+    <Float64 name="dynamic_vector" valueReference="1" causality="parameter" variability="tunable" description="Dynamic vector" start="1.0 2.0 3.0">
+      <Dimension valueReference="2"/>
+    </Float64>
+    <UInt64 name="dynamic_vector_dim" valueReference="2" causality="structuralParameter" variability="tunable" description="Dynamic vector dimension" start="3"/>
+
+    <Float64 name="static_matrix" valueReference="3" causality="parameter" variability="tunable" description="Static matrix" start="1.0 2.0 3.0 4.0 5.0 6.0">
+      <Dimension start="2"/>
+      <Dimension start="3"/>
+    </Float64>
+    <Float64 name="dynamic_matrix" valueReference="4" causality="parameter" variability="tunable" description="Dynamic matrix" start="1.0 2.0 3.0 4.0 5.0 6.0">
+      <Dimension valueReference="5"/>
+      <Dimension valueReference="6"/>
+    </Float64>
+    <UInt64 name="dynamic_matrix_dim1" valueReference="5" causality="structuralParameter" variability="tunable" description="Dynamic matrix dimension 1" start="2"/>
+    <UInt64 name="dynamic_matrix_dim2" valueReference="6" causality="structuralParameter" variability="tunable" description="Dynamic matrix dimension 2" start="3"/>
+
+    <UInt64 name="static_vector_idx" valueReference="7" causality="input" variability="discrete" description="Static vector element index" start="0"/>
+    <Float64 name="static_vector_out" valueReference="8" causality="output" variability="discrete" description="Indexed static vector element"/>
+
+    <UInt64 name="dynamic_vector_idx" valueReference="9" causality="input" variability="discrete" description="Dynamic vector element index" start="0"/>
+    <Float64 name="dynamic_vector_out" valueReference="10" causality="output" variability="discrete" description="Indexed dynamic vector element"/>
+
+    <UInt64 name="static_matrix_idx1" valueReference="11" causality="input" variability="discrete" description="Static matrix element index (dimension 1)" start="0"/>
+    <UInt64 name="static_matrix_idx2" valueReference="12" causality="input" variability="discrete" description="Static matrix element index (dimension 2)" start="0"/>
+    <Float64 name="static_matrix_out" valueReference="13" causality="output" variability="discrete" description="Indexed static matrix element"/>
+
+    <UInt64 name="dynamic_matrix_idx1" valueReference="14" causality="input" variability="discrete" description="Dynamic matrix element index (dimension 1)" start="0"/>
+    <UInt64 name="dynamic_matrix_idx2" valueReference="15" causality="input" variability="discrete" description="Dynamic matrix element index (dimension 2)" start="0"/>
+    <Float64 name="dynamic_matrix_out" valueReference="16" causality="output" variability="discrete" description="Indexed dynamic matrix element"/>
+  </ModelVariables>
+
+  <ModelStructure>
+    <Output valueReference="8" dependencies="7"/>
+    <Output valueReference="10" dependencies="9"/>
+    <Output valueReference="13" dependencies="11 12"/>
+    <Output valueReference="16" dependencies="14 15"/>
+  </ModelStructure>
+</fmiModelDescription>
