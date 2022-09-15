@@ -123,6 +123,7 @@ collect_model_names(MODEL_NAMES "${CMAKE_CURRENT_LIST_DIR}")
 foreach (MODEL_NAME ${MODEL_NAMES})
 
 set(TARGET_NAME ${MODEL_NAME})
+set(USE_CXX OFF)
 
 SET(HEADERS
     ${MODEL_NAME}/config.h
@@ -146,8 +147,17 @@ elseif (${FMI_VERSION} EQUAL 3)
   )
 endif()
 
+if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/${MODEL_NAME}/model.cpp")
+  set (MODEL_SOURCE "${MODEL_NAME}/model.cpp")
+  set (MODEL_FILE "model.cpp")
+  set (USE_CXX ON)
+else ()
+  set (MODEL_SOURCE "${MODEL_NAME}/model.c")
+  set (MODEL_FILE "model.c")
+endif()
+
 SET(SOURCES
-  ${MODEL_NAME}/model.c
+  "${MODEL_SOURCE}"
   src/fmi${FMI_VERSION}Functions.c
   src/cosimulation.c
 )
@@ -157,6 +167,11 @@ add_library(${TARGET_NAME} SHARED
   ${SOURCES}
   ${MODEL_NAME}/FMI${FMI_VERSION}${FMI_TYPE}.xml
 )
+
+if (USE_CXX)
+  set_source_files_properties("src/fmi${FMI_VERSION}Functions.c" PROPERTIES LANGUAGE CXX)
+  set_source_files_properties("src/cosimulation.c" PROPERTIES LANGUAGE CXX)
+endif ()
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/dist)
 
@@ -219,7 +234,7 @@ if (${Python3_Interpreter_FOUND} AND ${Git_FOUND})
 endif()
 
 # model specific header and source
-foreach (SOURCE_FILE config.h model.c)
+foreach (SOURCE_FILE config.h "${MODEL_FILE}")
   add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
     "${CMAKE_CURRENT_SOURCE_DIR}/${MODEL_NAME}/${SOURCE_FILE}"
     "${FMU_BUILD_DIR}/sources/${SOURCE_FILE}"

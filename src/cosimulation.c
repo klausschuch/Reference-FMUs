@@ -14,6 +14,10 @@
 #include "config.h"
 #include "cosimulation.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 #if FMI_VERSION == 3
 #include "fmi3Functions.h"
 #endif
@@ -577,3 +581,7 @@ void doFixedStep(ModelInstance *comp, bool* stateEvent, bool* timeEvent) {
             &earlyReturnTime);          // earlyReturnTime
     }
 }
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus
