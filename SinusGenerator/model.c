@@ -5,8 +5,7 @@
 #include "config.h"
 #include "model.h"
 
-
-void setStartValues(ModelInstance *comp) {
+void setStartValues(ModelInstance * comp) {
     M(amplitude) = 10.0;
     M(frequency) = 5.0;
     M(phase) = 0.0;
@@ -16,7 +15,7 @@ void setStartValues(ModelInstance *comp) {
     M(sinus_out) = 0.0;
 }
 
-Status calculateValues(ModelInstance *comp) {
+Status calculateValues(ModelInstance * comp) {
     M(sinus_out) = M(offset);
     if (comp->time >= M(start_time)) {
         M(sinus_out) += M(amplitude) * sin(2.0 * M_PI * M(frequency) * (comp->time - M(start_time)) + M(phase));
@@ -25,33 +24,33 @@ Status calculateValues(ModelInstance *comp) {
     return OK;
 }
 
-Status getFloat64(ModelInstance* comp, ValueReference vr, double *value, size_t *index) {
+Status getFloat64(ModelInstance * comp, ValueReference vr, double * value, size_t * index) {
     switch (vr) {
-    case vr_amplitude:
-        value[(*index)++] = M(amplitude);
-        return OK;
-    case vr_frequency:
-        value[(*index)++] = M(frequency);
-        return OK;
-    case vr_phase:
-        value[(*index)++] = M(phase);
-        return OK;
-    case vr_offset:
-        value[(*index)++] = M(offset);
-        return OK;
-    case vr_start_time:
-        value[(*index)++] = M(start_time);
-        return OK;
-    case vr_sinus_out:
-        value[(*index)++] = M(sinus_out);
-        return OK;
-    default:
-        logError(comp, "Get Float64 is not allowed for value reference %u.", vr);
-        return Error;
+        case vr_amplitude:
+            value[(*index)++] = M(amplitude);
+            return OK;
+        case vr_frequency:
+            value[(*index)++] = M(frequency);
+            return OK;
+        case vr_phase:
+            value[(*index)++] = M(phase);
+            return OK;
+        case vr_offset:
+            value[(*index)++] = M(offset);
+            return OK;
+        case vr_start_time:
+            value[(*index)++] = M(start_time);
+            return OK;
+        case vr_sinus_out:
+            value[(*index)++] = M(sinus_out);
+            return OK;
+        default:
+            logError(comp, "Get Float64 is not allowed for value reference %u.", vr);
+            return Error;
     }
 }
 
-Status setFloat64(ModelInstance* comp, ValueReference vr, const double *value, size_t *index) {
+Status setFloat64(ModelInstance * comp, ValueReference vr, const double * value, size_t * index) {
     switch (vr) {
         case vr_amplitude:
             M(amplitude) = value[(*index)++];

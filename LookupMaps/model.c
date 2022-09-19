@@ -1,13 +1,12 @@
-#include "config.h"
 #include "model.h"
+#include "config.h"
 
-
-void setStartValues(ModelInstance *comp) {
+void setStartValues(ModelInstance * comp) {
     M(x)[0] = 2.0;
     M(x)[1] = 3.0;
     M(y)[0] = 10.0;
     M(y)[1] = 25.0;
-    M(y)[2] = 30.0;    
+    M(y)[2] = 30.0;
     M(v)[0][0] = 11.0;
     M(v)[0][1] = 12.0;
     M(v)[0][2] = 13.0;
@@ -32,7 +31,7 @@ void setStartValues(ModelInstance *comp) {
     M(curve_out) = 10.0;
 }
 
-Status calculateValues(ModelInstance *comp) {
+Status calculateValues(ModelInstance * comp) {
     double z = 0;
     double out = 0;
 
@@ -63,7 +62,7 @@ Status calculateValues(ModelInstance *comp) {
             z = M(v)[0][2];
     }
     if (x >= M(x)[1]) {
-        if (y >= M(y)[0]) 
+        if (y >= M(y)[0])
             z = M(v)[1][0];
         if (y >= M(y)[1])
             z = M(v)[1][1];
@@ -78,7 +77,7 @@ Status calculateValues(ModelInstance *comp) {
     return OK;
 }
 
-Status getFloat64(ModelInstance* comp, ValueReference vr, double *value, size_t *index) {
+Status getFloat64(ModelInstance * comp, ValueReference vr, double * value, size_t * index) {
     size_t i = 0;
     size_t j = 0;
 
@@ -133,7 +132,7 @@ Status getFloat64(ModelInstance* comp, ValueReference vr, double *value, size_t 
     return OK;
 }
 
-Status setFloat64(ModelInstance* comp, ValueReference vr, const double *value, size_t *index) {
+Status setFloat64(ModelInstance * comp, ValueReference vr, const double * value, size_t * index) {
     size_t i = 0;
     size_t j = 0;
 
