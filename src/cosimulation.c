@@ -14,6 +14,10 @@
 #include "config.h"
 #include "cosimulation.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 #if FMI_VERSION == 3
 #include "fmi3Functions.h"
 #endif
@@ -523,6 +527,7 @@ void doFixedStep(ModelInstance *comp, bool* stateEvent, bool* timeEvent) {
     double  x[NX] = { 0 };
     double dx[NX] = { 0 };
 
+    calculateValues(comp);
     getContinuousStates(comp, x, NX);
     getDerivatives(comp, dx, NX);
 
@@ -537,6 +542,8 @@ void doFixedStep(ModelInstance *comp, bool* stateEvent, bool* timeEvent) {
     comp->nSteps++;
 
     comp->time = comp->nSteps * FIXED_SOLVER_STEP;
+
+    calculateValues(comp);
 
     // state event
     *stateEvent = false;
@@ -574,3 +581,7 @@ void doFixedStep(ModelInstance *comp, bool* stateEvent, bool* timeEvent) {
             &earlyReturnTime);          // earlyReturnTime
     }
 }
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fmiBuildDescription fmiVersion="3.0">
+  <BuildConfiguration modelIdentifier="LookupMaps">
+    <SourceFileSet language="C++14">
+      <SourceFile name="fmi3Functions.c"/>
+      <SourceFile name="model.cpp"/>
+      <SourceFile name="cosimulation.c"/>
+      <PreprocessorDefinition name="FMI_VERSION" value="3"/>
+    </SourceFileSet>
+  </BuildConfiguration>
+
+</fmiBuildDescription>

@@ -13,6 +13,10 @@
 
 #include "config.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if FMI_VERSION == 1
 
 #define not_modelError (Instantiated| Initialized | Terminated)
@@ -232,5 +236,9 @@ void setFMUState(ModelInstance* comp, void* FMUState);
 // "stringification" macros
 #define xstr(s) str(s)
 #define str(s) #s
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  /* model_h */

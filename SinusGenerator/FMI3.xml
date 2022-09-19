@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fmiModelDescription fmiVersion="3.0" modelName="SinusGenerator" generationTool="Reference FMUs (development build)" instantiationToken="{8c4e810f-3df3-4a01-8276-176fa3c9f008}">
+  <CoSimulation
+    modelIdentifier="SinusGenerator"
+    canHandleVariableCommunicationStepSize="true"
+    fixedInternalStepSize="0.001"/>
+
+  <DefaultExperiment startTime="0" stopTime="10" stepSize="0.01"/>
+
+  <ModelVariables>
+    <Float64 name="amplitude" valueReference="0" causality="parameter" variability="tunable" description="Amplitude of the sine wave" start="10.0"/>
+    <Float64 name="frequency" valueReference="1" causality="parameter" variability="tunable" description="Frequency of the sine wave" start="5"/>
+    <Float64 name="phase" valueReference="2" causality="parameter" variability="tunable" description="Phase of the sine wave" start="0"/>
+    <Float64 name="offset" valueReference="3" causality="parameter" variability="tunable" description="Offset of the sine wave" start="0"/>
+    <Float64 name="start_time" valueReference="4" causality="parameter" variability="tunable" description="Output = offset for time &lt; startTime" start="0"/>
+    <Float64 name="sinus_out" valueReference="5" causality="output"/>
+  </ModelVariables>
+
+  <ModelStructure>
+    <Output valueReference="5"/>
+  </ModelStructure>
+
+</fmiModelDescription>

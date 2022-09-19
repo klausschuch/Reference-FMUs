@@ -18,6 +18,7 @@
 #include "model.h"
 #include "cosimulation.h"
 
+
 // C-code FMUs have functions names prefixed with MODEL_IDENTIFIER_.
 // Define DISABLE_PREFIX to build a binary FMU.
 #if !defined(DISABLE_PREFIX) && !defined(FMI3_FUNCTION_PREFIX)
@@ -26,6 +27,10 @@
 #define FMI3_FUNCTION_PREFIX pasteB(MODEL_IDENTIFIER, _)
 #endif
 #include "fmi3Functions.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
 
 #define ASSERT_NOT_NULL(p) \
 do { \
@@ -43,7 +48,7 @@ do { \
     size_t index = 0; \
     Status status = OK; \
     if (nValueReferences == 0) return (fmi3Status)status; \
-    if (S->isDirtyValues) { \
+    if (S->isDirtyValues && S->state != StepMode) { \
         Status s = calculateValues(S); \
         status = max(status, s); \
         if (status > Warning) return (fmi3Status)status; \
@@ -658,7 +663,7 @@ fmi3Status fmi3GetClock(fmi3Instance instance,
     Status status = OK;
 
     for (size_t i = 0; i < nValueReferences; i++) {
-        Status s = getClock(instance, (ValueReference)valueReferences[i], &values[i]);
+        Status s = getClock((ModelInstance*)instance, (ValueReference)valueReferences[i], &values[i]);
         status = max(status, s);
         if (status > Warning) return (fmi3Status)status;
     }
@@ -832,7 +837,7 @@ fmi3Status fmi3SetClock(fmi3Instance instance,
 
     for (size_t i = 0; i < nValueReferences; i++) {
         if (values[i]) {
-            Status s = activateClock(instance, (ValueReference)valueReferences[i]);
+            Status s = activateClock((ModelInstance*)instance, (ValueReference)valueReferences[i]);
             status = max(status, s);
             if (status > Warning) return (fmi3Status)status;
         }
@@ -1067,7 +1072,7 @@ fmi3Status fmi3GetIntervalDecimal(fmi3Instance instance,
     Status status = OK;
 
     for (size_t i = 0; i < nValueReferences; i++) {
-        Status s = getInterval(instance, (ValueReference)valueReferences[i], &intervals[i], (int*)&qualifiers[i]);
+        Status s = getInterval((ModelInstance*)instance, (ValueReference)valueReferences[i], &intervals[i], (int*)&qualifiers[i]);
         status = max(status, s);
         if (status > Warning) return (fmi3Status)status;
     }
@@ -1235,6 +1240,7 @@ fmi3Status fmi3SetTime(fmi3Instance instance, fmi3Float64 time) {
     ASSERT_STATE(SetTime);
 
     S->time = time;
+    S->isDirtyValues = true;
 
     return fmi3OK;
 }
@@ -1433,7 +1439,6 @@ fmi3Status fmi3DoStep(fmi3Instance instance,
     *eventHandlingNeeded = fmi3False;
 
     while (true) {
-
         nextCommunicationPointReached = S->time + FIXED_SOLVER_STEP > nextCommunicationPoint;
 
         if (nextCommunicationPointReached) {
@@ -1461,6 +1466,7 @@ fmi3Status fmi3DoStep(fmi3Instance instance,
         }
 #endif
     }
+    calculateValues(S);
 
     *earlyReturn = !nextCommunicationPointReached;
 
@@ -1479,3 +1485,7 @@ fmi3Status fmi3ActivateModelPartition(fmi3Instance instance,
 
     return (fmi3Status)activateModelPartition(S, (ValueReference)clockReference, activationTime);
 }
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus

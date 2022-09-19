@@ -79,19 +79,51 @@ if (${FMI_VERSION} LESS 3)
 ")
 endif ()
 
-set (MODEL_NAMES BouncingBall Dahlquist Stair Feedthrough VanDerPol)
+# collect model names
+function (collect_model_names RESULT CUR_DIR)
+  set (MODEL_NAMES_ "")
 
-if (${FMI_VERSION} GREATER 1 OR "${FMI_TYPE}" STREQUAL "CS")
-  set (MODEL_NAMES ${MODEL_NAMES} Resource)
-endif ()
+  set (VERSION_STR_ "${FMI_VERSION}")
+  if (${FMI_VERSION} EQUAL 1)
+    set (VERSION_STR_ "${VERSION_STR_}${FMI_TYPE}")
+  endif ()
 
-if (${FMI_VERSION} GREATER 2)
-  set (MODEL_NAMES ${MODEL_NAMES} LinearTransform Clocks)
-endif ()
+  file (GLOB CHILDREN_ RELATIVE "${CUR_DIR}" "${CUR_DIR}/*")
+  foreach (CHILD_ ${CHILDREN_})
+    if (NOT IS_DIRECTORY "${CUR_DIR}/${CHILD_}")
+      continue()
+    endif ()
+
+    set (MODEL_DIR_ "${CUR_DIR}/${CHILD_}")
+    file (GLOB MODEL_FILES_ RELATIVE "${MODEL_DIR_}" "${MODEL_DIR_}/*")
+
+    set (VERSIONS_ "")
+    foreach (FILE_NAME_ ${MODEL_FILES_})
+      if (FILE_NAME_ STREQUAL "FMI3.xml")
+        list (APPEND VERSIONS_ "3")
+      elseif (FILE_NAME_ STREQUAL "FMI2.xml")
+        list (APPEND VERSIONS_ "2")
+      elseif (FILE_NAME_ STREQUAL "FMI1CS.xml")
+        list (APPEND VERSIONS_ "1CS")
+      elseif (FILE_NAME_ STREQUAL "FMI1ME.xml")
+        list (APPEND VERSIONS_ "1ME")
+      endif ()
+    endforeach ()
+
+    if (${VERSION_STR_} IN_LIST VERSIONS_)
+      list (APPEND MODEL_NAMES_ ${CHILD_})
+    endif ()
+  endforeach ()
+
+  set(${RESULT} ${MODEL_NAMES_} PARENT_SCOPE)
+endfunction ()
+
+collect_model_names(MODEL_NAMES "${CMAKE_CURRENT_LIST_DIR}")
 
 foreach (MODEL_NAME ${MODEL_NAMES})
 
 set(TARGET_NAME ${MODEL_NAME})
+set(USE_CXX OFF)
 
 SET(HEADERS
     ${MODEL_NAME}/config.h
@@ -115,8 +147,17 @@ elseif (${FMI_VERSION} EQUAL 3)
   )
 endif()
 
+if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/${MODEL_NAME}/model.cpp")
+  set (MODEL_SOURCE "${MODEL_NAME}/model.cpp")
+  set (MODEL_FILE "model.cpp")
+  set (USE_CXX ON)
+else ()
+  set (MODEL_SOURCE "${MODEL_NAME}/model.c")
+  set (MODEL_FILE "model.c")
+endif()
+
 SET(SOURCES
-  ${MODEL_NAME}/model.c
+  "${MODEL_SOURCE}"
   src/fmi${FMI_VERSION}Functions.c
   src/cosimulation.c
 )
@@ -126,6 +167,11 @@ add_library(${TARGET_NAME} SHARED
   ${SOURCES}
   ${MODEL_NAME}/FMI${FMI_VERSION}${FMI_TYPE}.xml
 )
+
+if (USE_CXX)
+  set_source_files_properties("src/fmi${FMI_VERSION}Functions.c" PROPERTIES LANGUAGE CXX)
+  set_source_files_properties("src/cosimulation.c" PROPERTIES LANGUAGE CXX)
+endif ()
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/dist)
 
@@ -188,7 +234,7 @@ if (${Python3_Interpreter_FOUND} AND ${Git_FOUND})
 endif()
 
 # model specific header and source
-foreach (SOURCE_FILE config.h model.c)
+foreach (SOURCE_FILE config.h "${MODEL_FILE}")
   add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
     "${CMAKE_CURRENT_SOURCE_DIR}/${MODEL_NAME}/${SOURCE_FILE}"
     "${FMU_BUILD_DIR}/sources/${SOURCE_FILE}"
@@ -196,29 +242,35 @@ foreach (SOURCE_FILE config.h model.c)
 endforeach(SOURCE_FILE)
 
 # documentation
-if (${FMI_VERSION} EQUAL 1)
-  add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
-    "${CMAKE_CURRENT_SOURCE_DIR}/${MODEL_NAME}/readme.html"
-    "${FMU_BUILD_DIR}/documentation/_main.html"
-  )
-else()
-  add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
-    "${CMAKE_CURRENT_SOURCE_DIR}/${MODEL_NAME}/readme.html"
-    "${FMU_BUILD_DIR}/documentation/index.html"
-  )
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${MODEL_NAME}/readme.html")
+  if (${FMI_VERSION} EQUAL 1)
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
+      "${CMAKE_CURRENT_SOURCE_DIR}/${MODEL_NAME}/readme.html"
+      "${FMU_BUILD_DIR}/documentation/_main.html"
+    )
+  else()
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
+      "${CMAKE_CURRENT_SOURCE_DIR}/${MODEL_NAME}/readme.html"
+      "${FMU_BUILD_DIR}/documentation/index.html"
+    )
+  endif()
 endif()
 
 # plot
-add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
-  "${CMAKE_CURRENT_SOURCE_DIR}/${MODEL_NAME}/${MODEL_NAME}_ref.svg"
-  "${FMU_BUILD_DIR}/documentation/${MODEL_NAME}_ref.svg"
-)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${MODEL_NAME}/${MODEL_NAME}_ref.svg")
+  add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
+    "${CMAKE_CURRENT_SOURCE_DIR}/${MODEL_NAME}/${MODEL_NAME}_ref.svg"
+    "${FMU_BUILD_DIR}/documentation/${MODEL_NAME}_ref.svg"
+  )
+endif()
 
 # reference csv
-add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
-  "${CMAKE_CURRENT_SOURCE_DIR}/${MODEL_NAME}/${MODEL_NAME}_ref.csv"
-  "${FMU_BUILD_DIR}/documentation/${MODEL_NAME}_ref.csv"
-)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${MODEL_NAME}/${MODEL_NAME}_ref.csv")
+  add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy
+    "${CMAKE_CURRENT_SOURCE_DIR}/${MODEL_NAME}/${MODEL_NAME}_ref.csv"
+    "${FMU_BUILD_DIR}/documentation/${MODEL_NAME}_ref.csv"
+  )
+endif()
 
 # license
 add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy

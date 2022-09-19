@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fmiModelDescription fmiVersion="3.0" modelName="LookupMaps" generationTool="Reference FMUs (development build)" instantiationToken="{8c4e810f-3df3-4a03-8276-176fa3c9f008}">
+  <CoSimulation
+    modelIdentifier="LookupMaps"
+    canHandleVariableCommunicationStepSize="true"
+    fixedInternalStepSize="0.001"/>
+
+  <DefaultExperiment startTime="0" stopTime="10" stepSize="0.01"/>
+
+  <ModelVariables>
+    <Float64 name="x" valueReference="0" causality="parameter" variability="tunable" description="Domain 1" start="2.0 3.0">
+      <Dimension start="2"/>
+    </Float64>
+    <Float64 name="y" valueReference="1" causality="parameter" variability="tunable" description="Domain 2" start="10.0 25.0 30.0">
+      <Dimension start="3"/>
+    </Float64>
+    <Float64 name="v" valueReference="2" causality="parameter" variability="tunable" description="Map codomain" start="11.0 12.0 13.0 21.0 22.0 23.0">
+      <Dimension start="2"/>
+      <Dimension start="3"/>
+    </Float64>
+
+    <Float64 name="d" valueReference="3" causality="parameter" variability="tunable" description="Domain" start="10.0 20.0 25.0 30.0">
+      <Dimension start="4"/>
+    </Float64>
+    <Float64 name="cd" valueReference="4" causality="parameter" variability="tunable" description="Curve codomain" start="10.0 20.0 30.0 40.0">
+      <Dimension start="4"/>
+    </Float64>
+
+    <Float64 name="map_x" valueReference="5" causality="input" variability="discrete" description="Domain 1 index" start="2.0"/>
+    <Float64 name="map_y" valueReference="6" causality="input" variability="discrete" description="Domain 2 index" start="10.0"/>
+    <Float64 name="map_out" valueReference="7" causality="output" variability="discrete" description="Map output"/>
+
+    <Float64 name="curve_x" valueReference="8" causality="input" variability="discrete" description="Domain index" start="10.0"/>
+    <Float64 name="curve_out" valueReference="9" causality="output" variability="discrete" description="Curve output"/>
+  </ModelVariables>
+
+  <ModelStructure>
+    <Output valueReference="7" dependencies="5 6" dependenciesKind="dependent dependent"/>
+    <Output valueReference="9" dependencies="8" dependenciesKind="dependent"/>
+    <InitialUnknown valueReference="7" dependencies="5 6" dependenciesKind="dependent dependent"/>
+    <InitialUnknown valueReference="9" dependencies="8" dependenciesKind="dependent"/>
+  </ModelStructure>
+
+  <Annotations>
+    <Annotation type="avl">
+      <Tool name="AVL_SDT">
+        <AVLAnnotations>
+          <RegularMaps>
+            <RegularMap name="map2d">
+              <Domains>
+                <Domain name="x" input="map_x" />
+                <Domain name="y" input="map_y" />
+              </Domains>
+              <Codomains>
+                <Codomain name="v" />
+              </Codomains>
+            </RegularMap>
+
+            <RegularMap name="lookup1d">
+              <Domains>
+                <Domain name="d" input="curve_x" />
+              </Domains>
+              <Codomains>
+                <Codomain name="cd" />
+              </Codomains>
+            </RegularMap>
+          </RegularMaps>
+        </AVLAnnotations>
+      </Tool>
+    </Annotation>
+  </Annotations>
+</fmiModelDescription>
